@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="refresh" content="600">
+  <title>Climatempo SJB — Boletim Diário</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      background: #0a0a0a;
+      color: #e8e8e8;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      min-height: 100vh;
+      padding: 16px;
+    }
+
+    .container { max-width: 480px; margin: 0 auto; }
+
+    /* ── Header ── */
+    .header { text-align: center; padding: 20px 0 16px; }
+    .logo-row {
+      display: flex; align-items: center; justify-content: center; gap: 12px;
+      margin-bottom: 6px;
+    }
+    .logo-icon {
+      width: 52px; height: 52px;
+      background: #b91c1c;
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 26px;
+    }
+    .logo-text { font-size: 28px; font-weight: 900; color: #dc2626; letter-spacing: 2px; }
+    .logo-sub {
+      font-size: 10px; color: #555; letter-spacing: 3px;
+      text-transform: uppercase; margin-top: 2px;
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #141414;
+      border: 1px solid #1f1f1f;
+      border-radius: 12px;
+      padding: 14px 16px;
+      margin-bottom: 8px;
+    }
+    .location-name {
+      font-size: 15px; font-weight: 600;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .location-date { font-size: 13px; color: #777; margin-top: 3px; }
+
+    /* ── Section label ── */
+    .section-label {
+      text-align: center;
+      font-size: 10px; color: #555;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      margin: 14px 0 8px;
+    }
+
+    /* ── Temperature ── */
+    .temp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .temp-card { padding: 18px 16px; }
+    .temp-label { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .temp-value { font-size: 58px; font-weight: 200; line-height: 1; }
+    .temp-value.max { color: #f97316; }
+    .temp-value.min { color: #38bdf8; }
+    .temp-deg { font-size: 30px; vertical-align: super; }
+
+    /* ── Info row ── */
+    .info-row { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 8px; margin-bottom: 8px; }
+    .info-card { padding: 12px 12px; }
+    .info-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
+    .info-value { font-size: 15px; font-weight: 600; }
+    .moon-row { display: flex; align-items: center; gap: 8px; }
+    .moon-emoji { font-size: 24px; }
+    .moon-name { font-size: 13px; font-weight: 600; font-style: italic; }
+
+    /* ── Conditions ── */
+    .cond-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+    .cond-card { padding: 16px 8px; text-align: center; }
+    .cond-icon { font-size: 30px; margin-bottom: 8px; }
+    .cond-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
+    .cond-value { font-size: 18px; font-weight: 700; line-height: 1.2; }
+    .cond-sub { font-size: 11px; color: #888; margin-top: 4px; }
+    .cond-value.rain { color: #f97316; }
+    .cond-value.wind { color: #38bdf8; }
+
+    /* ── Precip ── */
+    .precip-card { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #ccc; }
+
+    /* ── Sea ── */
+    .sea-card { font-size: 14px; color: #ccc; }
+
+    /* ── Sun ── */
+    .sun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .sun-card { padding: 16px; text-align: center; }
+    .sun-icon { font-size: 34px; margin-bottom: 8px; }
+    .sun-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
+    .sun-time { font-size: 28px; font-weight: 200; }
+
+    /* ── Alert ── */
+    .alert-card {
+      background: #92400e;
+      border: 1px solid #b45309;
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: flex; align-items: center; gap: 10px;
+      font-size: 14px; font-weight: 600; color: #fde68a;
+      margin: 8px 0;
+    }
+
+    /* ── Footer ── */
+    .footer { text-align: center; padding: 20px 0 8px; }
+    .footer-logo {
+      display: flex; align-items: center; justify-content: center;
+      gap: 8px; margin-bottom: 4px;
+    }
+    .footer-icon {
+      width: 28px; height: 28px; background: #b91c1c;
+      border-radius: 6px; display: flex; align-items: center;
+      justify-content: center; font-size: 14px;
+    }
+    .footer-name { font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 1px; }
+    .footer-sub { font-size: 11px; color: #444; }
+    .updated { font-size: 11px; color: #333; margin-top: 6px; }
+  </style>
+</head>
+<body>
+<div class="container">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo-row">
+      <div class="logo-icon">🌦️</div>
+      <span class="logo-text">CLIMATEMPO SJB</span>
+    </div>
+    <div class="logo-sub">Boletim Meteorológico Diário</div>
+  </div>
+
+  <!-- Location -->
+  <div class="card">
+    <div class="location-name">📍 São João da Barra – RJ</div>
+    <div class="location-date">{{ date_str }}</div>
+  </div>
+
+  <!-- Temperature -->
+  <div class="section-label">Temperatura</div>
+  <div class="temp-grid">
+    <div class="card temp-card">
+      <div class="temp-label">Máxima</div>
+      <div class="temp-value max">{{ temp_max }}<span class="temp-deg">°</span></div>
+    </div>
+    <div class="card temp-card">
+      <div class="temp-label">Mínima</div>
+      <div class="temp-value min">{{ temp_min }}<span class="temp-deg">°</span></div>
+    </div>
+  </div>
+
+  <div class="info-row">
+    <div class="card info-card">
+      <div class="info-label">Sensação</div>
+      <div class="info-value">até {{ temp_feels }}°C</div>
+    </div>
+    <div class="card info-card">
+      <div class="info-label">Atual</div>
+      <div class="info-value">{{ temp_current }}°C</div>
+    </div>
+    <div class="card info-card">
+      <div class="info-label">Lua</div>
+      <div class="moon-row">
+        <span class="moon-emoji">{{ moon_emoji }}</span>
+        <span class="moon-name">{{ moon_name }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Conditions -->
+  <div class="section-label">Condições do Dia</div>
+  <div class="cond-grid">
+    <div class="card cond-card">
+      <div class="cond-icon">🌧️</div>
+      <div class="cond-label">Chuva</div>
+      <div class="cond-value rain">{{ rain_pct }}%</div>
+      <div class="cond-sub">{{ rain_label }}</div>
+    </div>
+    <div class="card cond-card">
+      <div class="cond-icon">💨</div>
+      <div class="cond-label">Vento</div>
+      <div class="cond-value wind">{{ wind_speed }} km/h</div>
+      <div class="cond-sub">{{ wind_dir }} raj.{{ wind_gust }}</div>
+    </div>
+    <div class="card cond-card">
+      <div class="cond-icon">🌤️</div>
+      <div class="cond-label">UV</div>
+      <div class="cond-value">{{ uv }}</div>
+      <div class="cond-sub">{{ uv_label }}</div>
+    </div>
+  </div>
+
+  <!-- Precipitation -->
+  <div class="card precip-card">
+    <span>💧</span>
+    <span>Precipitação acumulada: {{ precip_sum }} mm</span>
+  </div>
+
+  <!-- Sea -->
+  <div class="section-label">🌊 Mar</div>
+  <div class="card sea-card">
+    Ondas: ~{{ wave_height }} m &middot; {{ wave_period }}s &middot; {{ wave_dir }}
+    &middot; Precipitação: {{ precip_sum }} mm
+  </div>
+
+  <!-- Sun -->
+  <div class="section-label">Sol</div>
+  <div class="sun-grid">
+    <div class="card sun-card">
+      <div class="sun-icon">🌅</div>
+      <div class="sun-label">Nascer</div>
+      <div class="sun-time">~{{ sunrise }}</div>
+    </div>
+    <div class="card sun-card">
+      <div class="sun-icon">🌆</div>
+      <div class="sun-label">Pôr do sol</div>
+      <div class="sun-time">~{{ sunset }}</div>
+    </div>
+  </div>
+
+  <!-- Alert -->
+  {% if alerts %}
+  <div class="alert-card">
+    ⚠️ Instabilidade — {{ alerts | join(' e ') }}.
+  </div>
+  {% endif %}
+
+  <!-- Footer -->
+  <div class="footer">
+    <div class="footer-logo">
+      <div class="footer-icon">🌦️</div>
+      <span class="footer-name">CLIMATEMPO SJB</span>
+    </div>
+    <div class="footer-sub">São João da Barra · RJ · Boletim Diário</div>
+    <div class="updated">Atualizado às {{ updated_at }} · Recarrega a cada 10 min</div>
+  </div>
+
+</div>
+</body>
+</html>

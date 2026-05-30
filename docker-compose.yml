@@ -1,0 +1,7 @@
+services:
+  climatempo-sjb:
+    build: .
+    container_name: climatempo-sjb
+    restart: unless-stopped
+    ports:
+      - "8002:8000"
