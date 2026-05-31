@@ -55,32 +55,32 @@ def rain_label(pct: int) -> str:
     return "Baixa"
 
 
-@app.get("/", response_class=HTMLResponse)
-async def dashboard(request: Request):
+async def fetch_dados() -> dict:
     tz = pytz.timezone(TIMEZONE)
     now = datetime.now(tz)
 
     async with httpx.AsyncClient(timeout=10) as client:
-        weather_req = client.get(
-            "https://api.open-meteo.com/v1/forecast",
-            params={
-                "latitude": LAT, "longitude": LON,
-                "current": "temperature_2m,apparent_temperature,precipitation_probability,"
-                           "wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index",
-                "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,"
-                         "sunrise,sunset,precipitation_probability_max",
-                "wind_speed_unit": "kmh", "timezone": TIMEZONE, "forecast_days": 1,
-            },
+        w, m = await asyncio.gather(
+            client.get(
+                "https://api.open-meteo.com/v1/forecast",
+                params={
+                    "latitude": LAT, "longitude": LON,
+                    "current": "temperature_2m,apparent_temperature,precipitation_probability,"
+                               "wind_speed_10m,wind_gusts_10m,wind_direction_10m,uv_index",
+                    "daily": "temperature_2m_max,temperature_2m_min,precipitation_sum,"
+                             "sunrise,sunset,precipitation_probability_max",
+                    "wind_speed_unit": "kmh", "timezone": TIMEZONE, "forecast_days": 1,
+                },
+            ),
+            client.get(
+                "https://marine-api.open-meteo.com/v1/marine",
+                params={
+                    "latitude": LAT, "longitude": LON,
+                    "current": "wave_height,wave_period,wave_direction",
+                    "timezone": TIMEZONE,
+                },
+            ),
         )
-        marine_req = client.get(
-            "https://marine-api.open-meteo.com/v1/marine",
-            params={
-                "latitude": LAT, "longitude": LON,
-                "current": "wave_height,wave_period,wave_direction",
-                "timezone": TIMEZONE,
-            },
-        )
-        w, m = await asyncio.gather(weather_req, marine_req)
 
     cur = w.json()["current"]
     daily = w.json()["daily"]
@@ -91,18 +91,14 @@ async def dashboard(request: Request):
     wind_gust = round(cur["wind_gusts_10m"])
     wind_dir = deg_to_dir(cur["wind_direction_10m"])
     uv = round(cur["uv_index"])
-    precip_sum = daily["precipitation_sum"][0] or 0.0
-
-    wave_height = mar.get("wave_height") or 0
+    precip_sum = round(daily["precipitation_sum"][0] or 0.0, 1)
+    wave_height = round(mar.get("wave_height") or 0, 1)
     wave_period = round(mar.get("wave_period") or 0)
     wave_dir = deg_to_dir(mar.get("wave_direction") or 0)
-
     moon_name, moon_emoji = moon_phase(now.date())
-
     sunrise = daily["sunrise"][0].split("T")[1][:5]
     sunset = daily["sunset"][0].split("T")[1][:5]
     day_name = DAYS_PT[now.weekday()]
-    date_str = f"{day_name} · {now.day}/{now.month}/{now.year}"
 
     alerts = []
     if rain_pct >= 70:
@@ -110,9 +106,8 @@ async def dashboard(request: Request):
     if wind_gust >= 40:
         alerts.append("vento forte")
 
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "date_str": date_str,
+    return {
+        "date_str": f"{day_name} · {now.day}/{now.month}/{now.year}",
         "updated_at": now.strftime("%H:%M"),
         "temp_max": round(daily["temperature_2m_max"][0]),
         "temp_min": round(daily["temperature_2m_min"][0]),
@@ -134,4 +129,15 @@ async def dashboard(request: Request):
         "sunrise": sunrise,
         "sunset": sunset,
         "alerts": alerts,
-    })
+    }
+
+
+@app.get("/", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    dados = await fetch_dados()
+    return templates.TemplateResponse("index.html", {"request": request, **dados})
+
+
+@app.get("/api/dados")
+async def api_dados():
+    return await fetch_dados()

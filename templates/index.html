@@ -1,249 +1,251 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-bs-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="refresh" content="600">
   <title>Climatempo SJB — Boletim Diário</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      background: #0a0a0a;
-      color: #e8e8e8;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      min-height: 100vh;
-      padding: 16px;
-    }
-
-    .container { max-width: 480px; margin: 0 auto; }
-
-    /* ── Header ── */
-    .header { text-align: center; padding: 20px 0 16px; }
-    .logo-row {
-      display: flex; align-items: center; justify-content: center; gap: 12px;
-      margin-bottom: 6px;
-    }
-    .logo-icon {
-      width: 52px; height: 52px;
-      background: #b91c1c;
-      border-radius: 10px;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 26px;
-    }
-    .logo-text { font-size: 28px; font-weight: 900; color: #dc2626; letter-spacing: 2px; }
-    .logo-sub {
-      font-size: 10px; color: #555; letter-spacing: 3px;
-      text-transform: uppercase; margin-top: 2px;
-    }
-
-    /* ── Cards ── */
-    .card {
-      background: #141414;
-      border: 1px solid #1f1f1f;
-      border-radius: 12px;
-      padding: 14px 16px;
-      margin-bottom: 8px;
-    }
-    .location-name {
-      font-size: 15px; font-weight: 600;
-      display: flex; align-items: center; gap: 6px;
-    }
-    .location-date { font-size: 13px; color: #777; margin-top: 3px; }
-
-    /* ── Section label ── */
-    .section-label {
-      text-align: center;
-      font-size: 10px; color: #555;
-      letter-spacing: 2.5px; text-transform: uppercase;
-      margin: 14px 0 8px;
-    }
-
-    /* ── Temperature ── */
-    .temp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .temp-card { padding: 18px 16px; }
-    .temp-label { font-size: 10px; color: #555; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
-    .temp-value { font-size: 58px; font-weight: 200; line-height: 1; }
-    .temp-value.max { color: #f97316; }
-    .temp-value.min { color: #38bdf8; }
-    .temp-deg { font-size: 30px; vertical-align: super; }
-
-    /* ── Info row ── */
-    .info-row { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 8px; margin-bottom: 8px; }
-    .info-card { padding: 12px 12px; }
-    .info-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 5px; }
-    .info-value { font-size: 15px; font-weight: 600; }
-    .moon-row { display: flex; align-items: center; gap: 8px; }
-    .moon-emoji { font-size: 24px; }
-    .moon-name { font-size: 13px; font-weight: 600; font-style: italic; }
-
-    /* ── Conditions ── */
-    .cond-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-    .cond-card { padding: 16px 8px; text-align: center; }
-    .cond-icon { font-size: 30px; margin-bottom: 8px; }
-    .cond-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
-    .cond-value { font-size: 18px; font-weight: 700; line-height: 1.2; }
-    .cond-sub { font-size: 11px; color: #888; margin-top: 4px; }
-    .cond-value.rain { color: #f97316; }
-    .cond-value.wind { color: #38bdf8; }
-
-    /* ── Precip ── */
-    .precip-card { display: flex; align-items: center; gap: 10px; font-size: 14px; color: #ccc; }
-
-    /* ── Sea ── */
-    .sea-card { font-size: 14px; color: #ccc; }
-
-    /* ── Sun ── */
-    .sun-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .sun-card { padding: 16px; text-align: center; }
-    .sun-icon { font-size: 34px; margin-bottom: 8px; }
-    .sun-label { font-size: 10px; color: #555; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; }
-    .sun-time { font-size: 28px; font-weight: 200; }
-
-    /* ── Alert ── */
-    .alert-card {
-      background: #92400e;
-      border: 1px solid #b45309;
-      border-radius: 12px;
-      padding: 14px 16px;
-      display: flex; align-items: center; gap: 10px;
-      font-size: 14px; font-weight: 600; color: #fde68a;
-      margin: 8px 0;
-    }
-
-    /* ── Footer ── */
-    .footer { text-align: center; padding: 20px 0 8px; }
-    .footer-logo {
-      display: flex; align-items: center; justify-content: center;
-      gap: 8px; margin-bottom: 4px;
-    }
-    .footer-icon {
-      width: 28px; height: 28px; background: #b91c1c;
-      border-radius: 6px; display: flex; align-items: center;
-      justify-content: center; font-size: 14px;
-    }
-    .footer-name { font-size: 15px; font-weight: 700; color: #dc2626; letter-spacing: 1px; }
-    .footer-sub { font-size: 11px; color: #444; }
-    .updated { font-size: 11px; color: #333; margin-top: 6px; }
+    body { background: #0a0a0a; }
+    .card { background: #141414; border-color: #222; }
+    .logo-text { font-size: 26px; font-weight: 900; color: #dc2626; letter-spacing: 2px; }
+    .section-label { font-size: 10px; letter-spacing: 2.5px; }
+    .temp-max { font-size: 56px; font-weight: 200; color: #f97316; line-height: 1; }
+    .temp-min { font-size: 56px; font-weight: 200; color: #38bdf8; line-height: 1; }
+    .cond-value { font-size: 18px; font-weight: 700; }
+    .sun-time { font-size: 26px; font-weight: 200; }
+    .field-label { font-size: 10px; letter-spacing: 1.5px; }
   </style>
 </head>
 <body>
-<div class="container">
+<div class="container py-4" style="max-width:520px">
 
   <!-- Header -->
-  <div class="header">
-    <div class="logo-row">
-      <div class="logo-icon">🌦️</div>
+  <div class="text-center mb-3">
+    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+      <span style="font-size:32px">🌦️</span>
       <span class="logo-text">CLIMATEMPO SJB</span>
     </div>
-    <div class="logo-sub">Boletim Meteorológico Diário</div>
+    <small class="text-muted text-uppercase section-label">Boletim Meteorológico Diário</small>
   </div>
 
-  <!-- Location -->
-  <div class="card">
-    <div class="location-name">📍 São João da Barra – RJ</div>
-    <div class="location-date">{{ date_str }}</div>
+  <!-- Location + Refresh -->
+  <div class="card mb-2">
+    <div class="card-body py-2 d-flex justify-content-between align-items-center">
+      <div>
+        <div class="fw-semibold">📍 São João da Barra – RJ</div>
+        <small class="text-muted" id="date-str">{{ date_str }}</small>
+      </div>
+      <div class="text-end">
+        <button class="btn btn-sm btn-outline-secondary mb-1" onclick="sincronizar()" id="btn-sync">
+          🔄 Sincronizar
+        </button>
+        <div><small class="text-muted">Atualizado às <span id="updated-at">{{ updated_at }}</span></small></div>
+      </div>
+    </div>
   </div>
 
   <!-- Temperature -->
-  <div class="section-label">Temperatura</div>
-  <div class="temp-grid">
-    <div class="card temp-card">
-      <div class="temp-label">Máxima</div>
-      <div class="temp-value max">{{ temp_max }}<span class="temp-deg">°</span></div>
+  <p class="text-center text-muted text-uppercase section-label mb-2">Temperatura</p>
+  <div class="row g-2 mb-2">
+    <div class="col-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-muted text-uppercase field-label mb-2">Máxima</div>
+          <div class="temp-max" id="temp-max">{{ temp_max }}°</div>
+        </div>
+      </div>
     </div>
-    <div class="card temp-card">
-      <div class="temp-label">Mínima</div>
-      <div class="temp-value min">{{ temp_min }}<span class="temp-deg">°</span></div>
+    <div class="col-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <div class="text-muted text-uppercase field-label mb-2">Mínima</div>
+          <div class="temp-min" id="temp-min">{{ temp_min }}°</div>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="info-row">
-    <div class="card info-card">
-      <div class="info-label">Sensação</div>
-      <div class="info-value">até {{ temp_feels }}°C</div>
+  <div class="row g-2 mb-2">
+    <div class="col-4">
+      <div class="card">
+        <div class="card-body py-2">
+          <div class="text-muted text-uppercase field-label mb-1">Sensação</div>
+          <div class="fw-semibold" id="temp-feels">até {{ temp_feels }}°C</div>
+        </div>
+      </div>
     </div>
-    <div class="card info-card">
-      <div class="info-label">Atual</div>
-      <div class="info-value">{{ temp_current }}°C</div>
+    <div class="col-4">
+      <div class="card">
+        <div class="card-body py-2">
+          <div class="text-muted text-uppercase field-label mb-1">Atual</div>
+          <div class="fw-semibold" id="temp-current">{{ temp_current }}°C</div>
+        </div>
+      </div>
     </div>
-    <div class="card info-card">
-      <div class="info-label">Lua</div>
-      <div class="moon-row">
-        <span class="moon-emoji">{{ moon_emoji }}</span>
-        <span class="moon-name">{{ moon_name }}</span>
+    <div class="col-4">
+      <div class="card">
+        <div class="card-body py-2">
+          <div class="text-muted text-uppercase field-label mb-1">Lua</div>
+          <div class="d-flex align-items-center gap-1">
+            <span id="moon-emoji" style="font-size:20px">{{ moon_emoji }}</span>
+            <span id="moon-name" style="font-size:12px;font-style:italic;font-weight:600">{{ moon_name }}</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 
   <!-- Conditions -->
-  <div class="section-label">Condições do Dia</div>
-  <div class="cond-grid">
-    <div class="card cond-card">
-      <div class="cond-icon">🌧️</div>
-      <div class="cond-label">Chuva</div>
-      <div class="cond-value rain">{{ rain_pct }}%</div>
-      <div class="cond-sub">{{ rain_label }}</div>
+  <p class="text-center text-muted text-uppercase section-label mb-2">Condições do Dia</p>
+  <div class="row g-2 mb-2">
+    <div class="col-4">
+      <div class="card text-center h-100">
+        <div class="card-body py-3">
+          <div style="font-size:28px">🌧️</div>
+          <div class="text-muted text-uppercase field-label my-1">Chuva</div>
+          <div class="cond-value" style="color:#f97316" id="rain-pct">{{ rain_pct }}%</div>
+          <small class="text-muted" id="rain-label">{{ rain_label }}</small>
+        </div>
+      </div>
     </div>
-    <div class="card cond-card">
-      <div class="cond-icon">💨</div>
-      <div class="cond-label">Vento</div>
-      <div class="cond-value wind">{{ wind_speed }} km/h</div>
-      <div class="cond-sub">{{ wind_dir }} raj.{{ wind_gust }}</div>
+    <div class="col-4">
+      <div class="card text-center h-100">
+        <div class="card-body py-3">
+          <div style="font-size:28px">💨</div>
+          <div class="text-muted text-uppercase field-label my-1">Vento</div>
+          <div class="cond-value" style="color:#38bdf8" id="wind-speed">{{ wind_speed }} km/h</div>
+          <small class="text-muted" id="wind-info">{{ wind_dir }} raj.{{ wind_gust }}</small>
+        </div>
+      </div>
     </div>
-    <div class="card cond-card">
-      <div class="cond-icon">🌤️</div>
-      <div class="cond-label">UV</div>
-      <div class="cond-value">{{ uv }}</div>
-      <div class="cond-sub">{{ uv_label }}</div>
+    <div class="col-4">
+      <div class="card text-center h-100">
+        <div class="card-body py-3">
+          <div style="font-size:28px">🌤️</div>
+          <div class="text-muted text-uppercase field-label my-1">UV</div>
+          <div class="cond-value" id="uv">{{ uv }}</div>
+          <small class="text-muted" id="uv-label">{{ uv_label }}</small>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Precipitation -->
-  <div class="card precip-card">
-    <span>💧</span>
-    <span>Precipitação acumulada: {{ precip_sum }} mm</span>
+  <div class="card mb-2">
+    <div class="card-body py-2 d-flex align-items-center gap-2">
+      <span>💧</span>
+      <span>Precipitação acumulada: <strong id="precip-sum">{{ precip_sum }}</strong> mm</span>
+    </div>
   </div>
 
   <!-- Sea -->
-  <div class="section-label">🌊 Mar</div>
-  <div class="card sea-card">
-    Ondas: ~{{ wave_height }} m &middot; {{ wave_period }}s &middot; {{ wave_dir }}
-    &middot; Precipitação: {{ precip_sum }} mm
+  <p class="text-center text-muted text-uppercase section-label mb-2">🌊 Mar</p>
+  <div class="card mb-2">
+    <div class="card-body py-2 text-secondary">
+      Ondas: ~<span id="wave-height">{{ wave_height }}</span> m
+      &middot; <span id="wave-period">{{ wave_period }}</span>s
+      &middot; <span id="wave-dir">{{ wave_dir }}</span>
+      &middot; Precipitação: <span id="precip-sum-2">{{ precip_sum }}</span> mm
+    </div>
   </div>
 
   <!-- Sun -->
-  <div class="section-label">Sol</div>
-  <div class="sun-grid">
-    <div class="card sun-card">
-      <div class="sun-icon">🌅</div>
-      <div class="sun-label">Nascer</div>
-      <div class="sun-time">~{{ sunrise }}</div>
+  <p class="text-center text-muted text-uppercase section-label mb-2">Sol</p>
+  <div class="row g-2 mb-2">
+    <div class="col-6">
+      <div class="card text-center">
+        <div class="card-body">
+          <div style="font-size:32px">🌅</div>
+          <div class="text-muted text-uppercase field-label my-1">Nascer</div>
+          <div class="sun-time" id="sunrise">~{{ sunrise }}</div>
+        </div>
+      </div>
     </div>
-    <div class="card sun-card">
-      <div class="sun-icon">🌆</div>
-      <div class="sun-label">Pôr do sol</div>
-      <div class="sun-time">~{{ sunset }}</div>
+    <div class="col-6">
+      <div class="card text-center">
+        <div class="card-body">
+          <div style="font-size:32px">🌆</div>
+          <div class="text-muted text-uppercase field-label my-1">Pôr do sol</div>
+          <div class="sun-time" id="sunset">~{{ sunset }}</div>
+        </div>
+      </div>
     </div>
   </div>
 
   <!-- Alert -->
-  {% if alerts %}
-  <div class="alert-card">
-    ⚠️ Instabilidade — {{ alerts | join(' e ') }}.
+  <div id="alert-container">
+    {% if alerts %}
+    <div class="alert d-flex align-items-center gap-2 mb-2" style="background:#92400e;border-color:#b45309;color:#fde68a">
+      ⚠️ Instabilidade — {{ alerts | join(' e ') }}.
+    </div>
+    {% endif %}
   </div>
-  {% endif %}
 
   <!-- Footer -->
-  <div class="footer">
-    <div class="footer-logo">
-      <div class="footer-icon">🌦️</div>
-      <span class="footer-name">CLIMATEMPO SJB</span>
+  <div class="text-center pt-2 pb-4">
+    <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
+      <span>🌦️</span>
+      <span style="font-weight:700;color:#dc2626;letter-spacing:1px">CLIMATEMPO SJB</span>
     </div>
-    <div class="footer-sub">São João da Barra · RJ · Boletim Diário</div>
-    <div class="updated">Atualizado às {{ updated_at }} · Recarrega a cada 10 min</div>
+    <small class="text-muted d-block">São João da Barra · RJ · Boletim Diário</small>
+    <small class="text-muted d-block mt-1">
+      Fonte:
+      <a href="https://open-meteo.com/" target="_blank" class="text-secondary">Open-Meteo Clima</a> ·
+      <a href="https://open-meteo.com/en/docs/marine-weather-api" target="_blank" class="text-secondary">Open-Meteo Mar</a>
+    </small>
   </div>
 
 </div>
+
+<script>
+async function sincronizar() {
+  const btn = document.getElementById('btn-sync');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Sincronizando...';
+
+  try {
+    const resp = await fetch('/api/dados');
+    if (!resp.ok) throw new Error();
+    const d = await resp.json();
+
+    document.getElementById('date-str').textContent = d.date_str;
+    document.getElementById('updated-at').textContent = d.updated_at;
+    document.getElementById('temp-max').textContent = d.temp_max + '°';
+    document.getElementById('temp-min').textContent = d.temp_min + '°';
+    document.getElementById('temp-feels').textContent = 'até ' + d.temp_feels + '°C';
+    document.getElementById('temp-current').textContent = d.temp_current + '°C';
+    document.getElementById('moon-emoji').textContent = d.moon_emoji;
+    document.getElementById('moon-name').textContent = d.moon_name;
+    document.getElementById('rain-pct').textContent = d.rain_pct + '%';
+    document.getElementById('rain-label').textContent = d.rain_label;
+    document.getElementById('wind-speed').textContent = d.wind_speed + ' km/h';
+    document.getElementById('wind-info').textContent = d.wind_dir + ' raj.' + d.wind_gust;
+    document.getElementById('uv').textContent = d.uv;
+    document.getElementById('uv-label').textContent = d.uv_label;
+    document.getElementById('precip-sum').textContent = d.precip_sum;
+    document.getElementById('precip-sum-2').textContent = d.precip_sum;
+    document.getElementById('wave-height').textContent = d.wave_height;
+    document.getElementById('wave-period').textContent = d.wave_period;
+    document.getElementById('wave-dir').textContent = d.wave_dir;
+    document.getElementById('sunrise').textContent = '~' + d.sunrise;
+    document.getElementById('sunset').textContent = '~' + d.sunset;
+
+    const ac = document.getElementById('alert-container');
+    ac.innerHTML = d.alerts.length
+      ? `<div class="alert d-flex align-items-center gap-2 mb-2" style="background:#92400e;border-color:#b45309;color:#fde68a">⚠️ Instabilidade — ${d.alerts.join(' e ')}.</div>`
+      : '';
+
+    btn.innerHTML = '✅ Atualizado';
+    setTimeout(() => { btn.innerHTML = '🔄 Sincronizar'; btn.disabled = false; }, 2000);
+  } catch {
+    btn.innerHTML = '❌ Erro';
+    setTimeout(() => { btn.innerHTML = '🔄 Sincronizar'; btn.disabled = false; }, 2000);
+  }
+}
+
+// Auto-sync a cada 10 minutos
+setInterval(sincronizar, 600_000);
+</script>
 </body>
 </html>
